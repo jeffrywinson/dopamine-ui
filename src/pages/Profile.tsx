@@ -37,6 +37,10 @@ export default function Profile() {
   const [name, setName] = useState<string>("");
   const [bio, setBio] = useState<string>("");
 
+  // Add tab state and email extraction
+  const [activeTab, setActiveTab] = useState<"posts" | "saved" | "achievements">("posts");
+  const email: string | null = (viewingUser as any)?.email ?? null;
+
   // Initialize edit fields when dialog opens
   const handleOpenChange = (val: boolean) => {
     setOpen(val);
@@ -82,10 +86,18 @@ export default function Profile() {
                   {(viewingUser.name || "C")[0]}
                 </AvatarFallback>
               </Avatar>
-              <div>
+              <div className="space-y-1">
                 <h1 className="text-2xl font-heading font-bold">{viewingUser.name || "Anonymous Chef"}</h1>
+                {email && (
+                  <p className="font-body text-muted-foreground text-sm">{email}</p>
+                )}
+                <div className="inline-flex items-center gap-2 mt-1">
+                  <span className="text-xs font-heading px-2 py-1 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 border border-white/10">
+                    Karma: {viewingUser.honorPoints ?? 0}
+                  </span>
+                </div>
                 {viewingUser.bio && (
-                  <p className="font-body text-muted-foreground mt-1">{viewingUser.bio}</p>
+                  <p className="font-body text-muted-foreground mt-2">{viewingUser.bio}</p>
                 )}
               </div>
               {isSelf && (
@@ -138,23 +150,90 @@ export default function Profile() {
 
       {/* Right Column */}
       <div className="lg:col-span-2 space-y-4">
-        <h2 className="font-heading text-xl">Posts by {viewingUser.name || "this user"}</h2>
-        {posts === undefined ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-            <p className="font-body text-muted-foreground">Loading posts...</p>
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-2">🍳</div>
-            <p className="font-body text-muted-foreground">No posts yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {posts.map((post) => (
-              <PostCard key={post._id} post={post} />
-            ))}
-          </div>
+        {/* Tabs */}
+        <div className="flex items-center gap-2 border-b border-border/50 pb-2">
+          <button
+            onClick={() => setActiveTab("posts")}
+            className={`px-4 py-2 rounded-lg font-heading text-sm transition ${
+              activeTab === "posts"
+                ? "bg-gradient-to-r from-primary to-accent text-white shadow glow-primary"
+                : "text-muted-foreground hover:bg-primary/10"
+            }`}
+          >
+            My Posts
+          </button>
+          <button
+            onClick={() => setActiveTab("saved")}
+            className={`px-4 py-2 rounded-lg font-heading text-sm transition ${
+              activeTab === "saved"
+                ? "bg-gradient-to-r from-primary to-accent text-white shadow glow-primary"
+                : "text-muted-foreground hover:bg-primary/10"
+            }`}
+          >
+            Saved Recipes
+          </button>
+          <button
+            onClick={() => setActiveTab("achievements")}
+            className={`px-4 py-2 rounded-lg font-heading text-sm transition ${
+              activeTab === "achievements"
+                ? "bg-gradient-to-r from-primary to-accent text-white shadow glow-primary"
+                : "text-muted-foreground hover:bg-primary/10"
+            }`}
+          >
+            Achievements / Badges
+          </button>
+        </div>
+
+        {/* Section Title */}
+        <h2 className="font-heading text-xl">
+          {activeTab === "posts" && <>Posts by {viewingUser.name || "this user"}</>}
+          {activeTab === "saved" && <>Saved Recipes</>}
+          {activeTab === "achievements" && <>Achievements / Badges</>}
+        </h2>
+
+        {/* Tab Content */}
+        {activeTab === "posts" && (
+          <>
+            {posts === undefined ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+                <p className="font-body text-muted-foreground">Loading posts...</p>
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-2">🍳</div>
+                <p className="font-body text-muted-foreground">No posts yet. Start sharing your recipes!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {posts.map((post) => (
+                  <PostCard key={post._id} post={post} />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === "saved" && (
+          <Card className="glass border">
+            <CardContent className="py-10 text-center">
+              <div className="text-4xl mb-2">📌</div>
+              <p className="font-body text-muted-foreground">
+                Saved Recipes will appear here soon.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "achievements" && (
+          <Card className="glass border">
+            <CardContent className="py-10 text-center">
+              <div className="text-4xl mb-2">🏆</div>
+              <p className="font-body text-muted-foreground">
+                Achievements and badges will appear here soon.
+              </p>
+            </CardContent>
+          </Card>
         )}
       </div>
 
