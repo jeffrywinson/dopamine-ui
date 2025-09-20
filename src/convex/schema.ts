@@ -32,12 +32,35 @@ const schema = defineSchema(
       role: v.optional(roleValidator), // role of the user. do not remove
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
-    // add other tables here
+    // Recipe posts table
+    posts: defineTable({
+      title: v.string(),
+      ingredients: v.array(v.string()),
+      caption: v.string(),
+      mediaFiles: v.array(v.string()), // URLs to stored files
+      authorId: v.id("users"),
+      authorName: v.string(),
+      authorImage: v.optional(v.string()),
+      approvals: v.number(),
+      disapprovals: v.number(),
+      comments: v.number(),
+    }).index("by_author", ["authorId"]),
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    // Comments table
+    comments: defineTable({
+      postId: v.id("posts"),
+      authorId: v.id("users"),
+      authorName: v.string(),
+      authorImage: v.optional(v.string()),
+      content: v.string(),
+    }).index("by_post", ["postId"]),
+
+    // User interactions table
+    interactions: defineTable({
+      userId: v.id("users"),
+      postId: v.id("posts"),
+      type: v.union(v.literal("approve"), v.literal("disapprove")),
+    }).index("by_user_post", ["userId", "postId"]),
   },
   {
     schemaValidation: false,
